@@ -1,6 +1,6 @@
-# Weatherstation Client
+# Weatherstation - Client
 
-- [Weatherstation Client](#weatherstation-client)
+- [Weatherstation - Client](#weatherstation---client)
   - [Idea](#idea)
   - [Current State](#current-state)
   - [Visualization of Data](#visualization-of-data)
@@ -27,6 +27,8 @@ As basis for the project a D1-mini was chosen, as it comes with onboard WiFi. Bu
 
 The idea is to read the sensor data and send a UDP broadcast in the network. Anyone who wants to use the data, can simply listen to the messages. To indicate the type of data, the messages are defined by a MAC (to know from which client the message comes from), a message id (to know the type of data) and the value.
 One could also try getting the mac adress via an ARP-request, but going through various layers could cause a wrong mac adress (e.g. the communication to the docker container). It would not crash, but it would also not be the right mac adress.
+
+Have a look at [Weatherstation Server](https://github.com/aaj07/weatherstation-server).
 
 ## Current State
 
