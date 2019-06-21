@@ -12,8 +12,8 @@
 #include <string>
 #include <algorithm>
 
-#include "msg.temperature/MsgTemperature.h"
-#include "msg.humidity/MsgHumidity.h"
+#include <MsgTemperature.h>
+#include <MsgHumidity.h>
 
 //------------------------------ CONSTANTS ------------------------------
 #define TRIGGER_CONFIG_PORTAL_PIN D8

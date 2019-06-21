@@ -1,16 +1,16 @@
 #ifndef MSG_HUMIDITY_MSGHUMIDITY_H_
 #define MSG_HUMIDITY_MSGHUMIDITY_H_
 
-#include "msg.common/MsgBase.h"
+#include <MsgBase.h>
 
 namespace Msg {
 namespace Humidity {
 
 const uint32_t sizeOfMessage = 14;
-class MsgHumidity: public Msg::Common::MsgBase<sizeOfMessage> {
+class MsgHumidity final: public Msg::Common::MsgBase<sizeOfMessage> {
 public:
     MsgHumidity(float humInPercent);
-    virtual ~MsgHumidity();
+    virtual ~MsgHumidity() = default;
 
 protected:
     char* getHumidityBitStream(float humInPercent) const;

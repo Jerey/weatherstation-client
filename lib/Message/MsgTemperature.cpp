@@ -1,14 +1,11 @@
 #include <math.h>
-#include "msg.temperature/MsgTemperature.h"
+#include <MsgTemperature.h>
 
 namespace Msg {
 namespace Temperature {
 
 MsgTemperature::MsgTemperature(float tempInCelcius) :
         Msg::Common::MsgBase<sizeOfMessage>(1, getTemperatureBitStream(tempInCelcius)) {
-}
-
-MsgTemperature::~MsgTemperature() {
 }
 
 char* Msg::Temperature::MsgTemperature::getTemperatureBitStream(float temp) const {

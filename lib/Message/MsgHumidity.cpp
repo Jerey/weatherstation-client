@@ -1,14 +1,11 @@
 #include <math.h>
-#include "msg.humidity/MsgHumidity.h"
+#include <MsgHumidity.h>
 
 namespace Msg {
 namespace Humidity {
 
 MsgHumidity::MsgHumidity(float humInPercent) :
         Msg::Common::MsgBase<sizeOfMessage>(2, getHumidityBitStream(humInPercent)) {
-}
-
-MsgHumidity::~MsgHumidity() {
 }
 
 char* Msg::Humidity::MsgHumidity::getHumidityBitStream(float humInPercent) const {
