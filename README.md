@@ -58,9 +58,9 @@ The list of needed hardware is as follows:
 - 4k7 Ohm Resistor
 - Button
 
-Following is the schematic for this setup. Sorry for the hand-drawn schematic (suggestions for a good and free schematic creator, please message me).
+Following is the schematic for this setup.
 
-<img src="/documentation/Schematic.jpg" width="400"> 
+<img src="/documentation/Schematic.svg" width="400"> 
 
 Note: The BME280 was added with wires to get a more exact temperature. Initially it was also added to the base shield, but there the temperature was always a bit higher.
 
