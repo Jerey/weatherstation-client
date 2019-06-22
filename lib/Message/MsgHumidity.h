@@ -9,7 +9,7 @@ namespace Humidity {
 const uint32_t sizeOfMessage = 2;
 class MsgHumidity final: public Msg::Common::MsgBase<sizeOfMessage> {
 public:
-    MsgHumidity(float humInPercent);
+    explicit MsgHumidity(float humInPercent);
     virtual ~MsgHumidity() = default;
 
 protected:
