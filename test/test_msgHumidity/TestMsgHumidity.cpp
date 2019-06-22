@@ -13,46 +13,38 @@ void messageID(void) {
 
 void humidity_0(void) {
     auto msg = ::Msg::Humidity::MsgHumidity(0.0);
-    char expectedMsgContents = 0b00000000;
+    char expectedMsgContents = 0x00;
 
-    auto result = msg.getMsgStream();
-    char expected[] = { msgId, expectedMsgContents, '\0' };
-    for (unsigned int i = 0; i < totalSizeOfMessage; i++) {
-        TEST_ASSERT_EQUAL(expected[i], result[i]);
-    }
+    const auto result = msg.getMsgStream();
+    const char expected[] = { msgId, expectedMsgContents, '\0' };
+    TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, result, Msg::Humidity::sizeOfMessage + 1);
 }
 
 void humidity_negative1(void) {
     auto msg = ::Msg::Humidity::MsgHumidity(-1.0);
-    char expectedMsgContents = 0b00000000;
+    const char expectedMsgContents = 0x00;
 
-    auto result = msg.getMsgStream();
-    char expected[] = { msgId, expectedMsgContents, '\0' };
-    for (unsigned int i = 0; i < totalSizeOfMessage; i++) {
-        TEST_ASSERT_EQUAL(expected[i], result[i]);
-    }
+    const auto result = msg.getMsgStream();
+    const char expected[] = { msgId, expectedMsgContents, '\0' };
+    TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, result, Msg::Humidity::sizeOfMessage + 1);
 }
 
 void humidity_100(void) {
     auto msg = ::Msg::Humidity::MsgHumidity(100.0);
-    char expectedMsgContents = 0b01100100;
+    const char expectedMsgContents = 0x64;
 
-    auto result = msg.getMsgStream();
+    const auto result = msg.getMsgStream();
     char expected[] = { msgId, expectedMsgContents, '\0' };
-    for (unsigned int i = 0; i < totalSizeOfMessage; i++) {
-        TEST_ASSERT_EQUAL(expected[i], result[i]);
-    }
+    TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, result, Msg::Humidity::sizeOfMessage + 1);
 }
 
 void humidity_255(void) {
     auto msg = ::Msg::Humidity::MsgHumidity(255.0);
-    const char expectedMsgContents = 0b01100100;
+    const char expectedMsgContents = 0x64;
 
-    auto result = msg.getMsgStream();
+    const auto result = msg.getMsgStream();
     const char expected[] = { msgId, expectedMsgContents, '\0' };
-    for (unsigned int i = 0; i < totalSizeOfMessage; i++) {
-        TEST_ASSERT_EQUAL(expected[i], result[i]);
-    }
+    TEST_ASSERT_EQUAL_HEX8_ARRAY(expected, result, Msg::Humidity::sizeOfMessage + 1);
 }
 
 } // anonymous namespace 

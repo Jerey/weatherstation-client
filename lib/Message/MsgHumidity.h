@@ -6,7 +6,7 @@
 namespace Msg {
 namespace Humidity {
 
-const uint32_t sizeOfMessage = 14;
+const uint32_t sizeOfMessage = 2;
 class MsgHumidity final: public Msg::Common::MsgBase<sizeOfMessage> {
 public:
     MsgHumidity(float humInPercent);

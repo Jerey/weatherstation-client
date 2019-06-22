@@ -7,6 +7,10 @@
 namespace Msg {
 namespace Common {
 
+/**
+ * @brief Base class for messages.
+ * @tparam SizeOfMessage The size of the message (1 Byte for the id + n bytes for the message  data).
+ */
 template<uint32_t SizeOfMessage>
 class MsgBase {
 public:

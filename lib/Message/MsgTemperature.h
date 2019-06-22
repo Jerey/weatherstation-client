@@ -6,8 +6,7 @@
 namespace Msg {
 namespace Temperature {
 
-const uint32_t sizeOfMessage = 14;
-
+const uint32_t sizeOfMessage = 2;
 class MsgTemperature final : public Msg::Common::MsgBase<sizeOfMessage> {
 public:
     MsgTemperature(float tempInCelcius);
