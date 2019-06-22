@@ -7,12 +7,12 @@ const char msgId = 2;
 const uint32_t totalSizeOfMessage = 3;
 
 void messageID(void) {
-    auto msg = ::Msg::Humidity::MsgHumidity(2.0);
+    const auto msg = ::Msg::Humidity::MsgHumidity(2.0);
     TEST_ASSERT_EQUAL(msgId, msg.getMsgID());
 }
 
 void humidity_0(void) {
-    auto msg = ::Msg::Humidity::MsgHumidity(0.0);
+    const auto msg = ::Msg::Humidity::MsgHumidity(0.0);
     char expectedMsgContents = 0x00;
 
     const auto result = msg.getMsgStream();
@@ -21,7 +21,7 @@ void humidity_0(void) {
 }
 
 void humidity_negative1(void) {
-    auto msg = ::Msg::Humidity::MsgHumidity(-1.0);
+    const auto msg = ::Msg::Humidity::MsgHumidity(-1.0);
     const char expectedMsgContents = 0x00;
 
     const auto result = msg.getMsgStream();
@@ -30,7 +30,7 @@ void humidity_negative1(void) {
 }
 
 void humidity_100(void) {
-    auto msg = ::Msg::Humidity::MsgHumidity(100.0);
+    const auto msg = ::Msg::Humidity::MsgHumidity(100.0);
     const char expectedMsgContents = 0x64;
 
     const auto result = msg.getMsgStream();
@@ -39,7 +39,7 @@ void humidity_100(void) {
 }
 
 void humidity_255(void) {
-    auto msg = ::Msg::Humidity::MsgHumidity(255.0);
+    const auto msg = ::Msg::Humidity::MsgHumidity(255.0);
     const char expectedMsgContents = 0x64;
 
     const auto result = msg.getMsgStream();

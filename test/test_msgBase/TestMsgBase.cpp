@@ -9,7 +9,7 @@ void checkMessageID(void) {
     const char data[msgSize - 1] = {2};
 
     for (uint32_t i = 0; i < 3; i++){
-        auto msg = ::Msg::Common::MsgBase<msgSize>(i, data);
+        const auto msg = ::Msg::Common::MsgBase<msgSize>(i, data);
         TEST_ASSERT_EQUAL(i, msg.getMsgID());
     }
 }
@@ -19,7 +19,7 @@ void checkData_shortMessage(void) {
     const uint32_t msgSize = 3;
     const char data[msgSize - 1] = {2, 3};
 
-    auto msg = ::Msg::Common::MsgBase<msgSize>(id, data);
+    const auto msg = ::Msg::Common::MsgBase<msgSize>(id, data);
     TEST_ASSERT_EQUAL(id, msg.getMsgID());
 
     const auto result = msg.getMsgStream();
@@ -32,7 +32,7 @@ void checkData_longMessage(void){
     const uint32_t msgSize = 6;
     const char data[msgSize - 1] = {0x02, 0x03, 0x04, 0x05, 0x06};
 
-    auto msg = ::Msg::Common::MsgBase<msgSize>(id, data);
+    const auto msg = ::Msg::Common::MsgBase<msgSize>(id, data);
     TEST_ASSERT_EQUAL(id, msg.getMsgID());
 
     const auto result = msg.getMsgStream();
