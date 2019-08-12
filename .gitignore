@@ -10,3 +10,4 @@ Client/.pydevproject
 .pioenvs/
 .piolibdeps/
 .vscode/
+.pio/

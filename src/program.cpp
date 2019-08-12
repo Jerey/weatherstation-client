@@ -4,6 +4,7 @@
 #include <SPI.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
 #include <WiFiManager.h>
@@ -14,6 +15,15 @@
 
 #include <MsgTemperature.h>
 #include <MsgHumidity.h>
+
+//------------------------------ UpdateServer Constants ------------------------------
+#define VERSION "v1.0.3"
+#define HOST "Weatherstation_Temp_Hum"
+const char* updateServerURL = "http://192.168.178.100:5000/update"; // Enter the correct update URL here.
+
+//------------------------------ Non Blocking Refresh Parameters ------------------------------
+unsigned long lastUpdateMillis;
+unsigned long updateFrequency = 5000;
 
 //------------------------------ CONSTANTS ------------------------------
 #define TRIGGER_CONFIG_PORTAL_PIN D8
@@ -31,13 +41,38 @@ const unsigned int UDPPort = 2807;
 const char* ssidAP = "AutoConnectAP";
 const char* passwordAP = "password";
 
-//------------------------------ Non Blocking Refresh Parameters ------------------------------
-unsigned long lastUpdateMillis;
-unsigned long updateFrequency = 10000;
-
-//------------------------------ MAC Adress
+//------------------------------ MAC Adress ------------------------------
 std::string macAdress;
 
+/**
+ * @brief Function to check the given updateServerURL for new updates.
+ * @see https://github.com/kstobbe/esp-update-server 
+ */
+void checkForUpdates()
+{
+    String checkUrl = String(updateServerURL);
+    checkUrl.concat( "?ver=" + String(VERSION) );
+    checkUrl.concat( "&dev=" + String(HOST) );
+
+    Serial.println("INFO: Checking for updates at URL: " + String( checkUrl ) );
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    auto returnStatus = ESPhttpUpdate.update(checkUrl);
+    #pragma GCC diagnostic pop
+
+    switch (returnStatus) {
+    default:
+    case HTTP_UPDATE_FAILED:
+        Serial.println("ERROR: HTTP_UPDATE_FAILD Error (" + String(ESPhttpUpdate.getLastError()) + "): " + ESPhttpUpdate.getLastErrorString().c_str());
+        break;
+    case HTTP_UPDATE_NO_UPDATES:
+        Serial.println("INFO: HTTP_UPDATE_NO_UPDATES");
+        break;
+    case HTTP_UPDATE_OK:
+        Serial.println("INFO status: HTTP_UPDATE_OK");
+        break;
+    }
+}
 
 /**
  * Helper function, which simply prints "." and sets a delay.
@@ -187,19 +222,20 @@ void handleWifiConfigPageButtonPressed() {
 }
 
 /**
- * Functino to handle sensor updates: Instead of sleeping, it checks if the msec have passed to update correclty.
+ * Function to handle sensor updates.
  */
 void handleSensorUpdates() {
-    unsigned long currentMillis = millis();
-    if ((currentMillis - lastUpdateMillis) > updateFrequency) {
-        lastUpdateMillis = currentMillis;
-        udpBroadcastTemperature();
-        udpBroadcastHumidity();
-    }
+    udpBroadcastTemperature();
+    udpBroadcastHumidity();
 }
 
 //------------------------------ LOOP ------------------------------
 void loop() {
     handleWifiConfigPageButtonPressed();
-    handleSensorUpdates();
+    unsigned long currentMillis = millis();
+    if ((currentMillis - lastUpdateMillis) > updateFrequency) {
+        lastUpdateMillis = currentMillis;
+        handleSensorUpdates();
+        checkForUpdates();
+    }
 }

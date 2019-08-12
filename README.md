@@ -2,23 +2,24 @@
 
 [![Build Status](https://travis-ci.com/aaj07/weatherstation-client.svg?branch=master)](https://travis-ci.com/aaj07/weatherstation-client)
 
-- [Weatherstation - Client](#Weatherstation---Client)
-  - [Idea](#Idea)
-  - [Current State](#Current-State)
-  - [Visualization of Data](#Visualization-of-Data)
-  - [Setup](#Setup)
-    - [Hardware](#Hardware)
-    - [Software](#Software)
-      - [Software settings](#Software-settings)
-      - [Flashing](#Flashing)
-  - [Documentation](#Documentation)
-    - [UDP Message Structure](#UDP-Message-Structure)
-      - [Temperature message](#Temperature-message)
-      - [Humidity message](#Humidity-message)
-  - [Usage of the client](#Usage-of-the-client)
-    - [Accesspoint at the beginning](#Accesspoint-at-the-beginning)
-  - [Some Images](#Some-Images)
-  - [Footnotes](#Footnotes)
+- [Weatherstation - Client](#weatherstation---client)
+  - [Idea](#idea)
+  - [Current State](#current-state)
+  - [Visualization of Data](#visualization-of-data)
+  - [Setup](#setup)
+    - [Hardware](#hardware)
+    - [Software](#software)
+      - [Software settings](#software-settings)
+      - [Flashing](#flashing)
+  - [Documentation](#documentation)
+    - [UDP Message Structure](#udp-message-structure)
+      - [Temperature message](#temperature-message)
+      - [Humidity message](#humidity-message)
+  - [Usage of the client](#usage-of-the-client)
+    - [Accesspoint at the beginning](#accesspoint-at-the-beginning)
+    - [Flashing software to several clients](#flashing-software-to-several-clients)
+  - [Some Images](#some-images)
+  - [Footnotes](#footnotes)
 
 ## Idea
 
@@ -131,15 +132,19 @@ When the software is flashed, the client will directly start. If it has not been
 
 When the client is started, the [WiFiManager](https://github.com/tzapu/WiFiManager) is being used to check, whether it has any known WiFi available to connect to. If it either does not know any WiFi or cannot connect to one, it opens up an access point and provides an user interface to setup the desired WiFi. From that point on, it will always try to connect to that WiFi. If you want to connect to another WiFi, press the button added to the board and the access point will again be opened.
 
+### Flashing software to several clients
+
+Work in progress: It currently is possible to flash several clients at once. The [ESP8266httpUpdate](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266httpUpdate) library is used to auto update the firmware, if the defined update server provides any new firmware. This decision is based on a version defined in the ```program.cpp```. For now a python flask server is used as update server. This is currently based on the docker image [esp-update-server](https://hub.docker.com/r/kstobbe/esp-update-server/). For more information on that, checkout the [readme.md](https://github.com/kstobbe/esp-update-server).
+
 ## Some Images
 
 On a breadboard:
 
-<img src="/documentation/Prototype_01.jpg" width="400"><img src="/documentation/Prototype_02.jpg" width="400"> 
+<img src="/documentation/Prototype_01.jpg" width="400"><img src="/documentation/Prototype_02.jpg" width="400">
 
 Further, one can also buy base shields and then solder all parts together:
 
-<img src="/documentation/Prototype_03.jpg" width="400"><img src="/documentation/Prototype_04.jpg" width="400"> 
+<img src="/documentation/Prototype_03.jpg" width="400"><img src="/documentation/Prototype_04.jpg" width="400">
 
 ## Footnotes
 
