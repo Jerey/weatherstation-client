@@ -1,20 +1,8 @@
 #include <Arduino.h>
-#include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
-#include <SPI.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
 #include <ESP8266httpUpdate.h>
-#include <WiFiUdp.h>
-#include <Wire.h>
 #include <WiFiManager.h>
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <string>
-#include <algorithm>
-
-#include <MsgTemperature.h>
-#include <MsgHumidity.h>
+#include <PubSubClient.h>
 
 //------------------------------ UpdateServer Constants ------------------------------
 #define VERSION "v1.0.3"
@@ -32,23 +20,25 @@ unsigned long updateFrequency = 5000;
 //------------------------------ BME Sensure Setup ------------------------------
 Adafruit_BME280 bme;
 
-//------------------------------ UDP Setup ------------------------------
-WiFiUDP clientUDP;
-IPAddress udpAdress;
-const unsigned int UDPPort = 2807;
-
 //------------------------------ AP ------------------------------
 const char* ssidAP = "AutoConnectAP";
 const char* passwordAP = "password";
 
 //------------------------------ MAC Adress ------------------------------
 std::string macAdress;
+std::string topic;
+
+//------------------------------ MQTT ------------------------------
+const char* mqttBroker = "192.168.178.99";
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
+char mqttBuffer[64];
 
 /**
  * @brief Function to check the given updateServerURL for new updates.
  * @see https://github.com/kstobbe/esp-update-server 
  */
-void checkForUpdates()
+void checkForSoftwareUpdates()
 {
     String checkUrl = String(updateServerURL);
     checkUrl.concat( "?ver=" + String(VERSION) );
@@ -61,16 +51,16 @@ void checkForUpdates()
     #pragma GCC diagnostic pop
 
     switch (returnStatus) {
-    default:
-    case HTTP_UPDATE_FAILED:
-        Serial.println("ERROR: HTTP_UPDATE_FAILD Error (" + String(ESPhttpUpdate.getLastError()) + "): " + ESPhttpUpdate.getLastErrorString().c_str());
-        break;
-    case HTTP_UPDATE_NO_UPDATES:
-        Serial.println("INFO: HTTP_UPDATE_NO_UPDATES");
-        break;
-    case HTTP_UPDATE_OK:
-        Serial.println("INFO status: HTTP_UPDATE_OK");
-        break;
+        default:
+        case HTTP_UPDATE_FAILED:
+            Serial.println("ERROR: HTTP_UPDATE_FAILD Error (" + String(ESPhttpUpdate.getLastError()) + "): " + ESPhttpUpdate.getLastErrorString().c_str());
+            break;
+        case HTTP_UPDATE_NO_UPDATES:
+            Serial.println("INFO: HTTP_UPDATE_NO_UPDATES");
+            break;
+        case HTTP_UPDATE_OK:
+            Serial.println("INFO status: HTTP_UPDATE_OK");
+            break;
     }
 }
 
@@ -116,19 +106,8 @@ void connectToWifi() {
 	auto mac = std::string(WiFi.macAddress().c_str());
 	mac.erase (std::remove(mac.begin(), mac.end(), ':'), mac.end());
 	macAdress = mac;
+    topic = "/esp/" + macAdress;
 	Serial.println(" -> Success!");
-}
-
-/**
- * Get the current ip of the device and create the broadcast ip.
- */
-void getAndSetTheUDPBroadcastIP() {
-	udpAdress = WiFi.localIP();
-	Serial.print("My Current Adress: ");
-	Serial.println(udpAdress);
-	udpAdress[3] = 255;
-	Serial.print("My Broadcasting Adress: ");
-	Serial.println(udpAdress);
 }
 
 /**
@@ -162,7 +141,7 @@ void errorDetected(uint8_t slowblinks, uint8_t fastblinks, bool loop, const char
 void setup() {
 	Serial.begin(115200);
 	Serial.println(
-			"**************************\n******** BEGIN ***********\n**************************");
+			"**************************\n\r******** BEGIN ***********\n\r**************************");
 
 	pinMode(TRIGGER_CONFIG_PORTAL_PIN, INPUT);
 
@@ -173,41 +152,24 @@ void setup() {
         errorDetected(16, 16, true, "Could not find a valid BME280 sensor, check wiring or if the defined I2C adress is correct!");
 	}
 	connectToWifi();
-	getAndSetTheUDPBroadcastIP();
+    Serial.print("Mqtt broker adress given: ");
+    Serial.println(mqttBroker);
+    mqttClient.setServer(mqttBroker, 1883);
 }
 
 /**
- * Helper to send the given parameter as a udp broadcast.
- * @param str The string to be broadcasted.
+ * Tries to reconnect to the mqtt broker.
  */
-void udpBroadcastStream(const char *str) {
-    clientUDP.beginPacket(udpAdress, UDPPort);
-    auto package = macAdress;
-    package.append(str);
-    clientUDP.write(package.c_str());
-    clientUDP.endPacket();
-}
-
-/**
- * Sends a broadcast with the current temperature.
- */
-void udpBroadcastTemperature() {
-    float t = bme.readTemperature();
-    extendetPrint("Temperature: ", t, " *C");
-    Msg::Temperature::MsgTemperature msgTemp(t);
-    auto resTemp = msgTemp.getMsgStream();
-    udpBroadcastStream(resTemp);
-}
-
-/**
- * Sends a broadcast with the current humidity.
- */
-void udpBroadcastHumidity() {
-    float h = bme.readHumidity();
-    extendetPrint("Humidity: ", h, " Precent");
-    Msg::Humidity::MsgHumidity msgHum(h);
-    auto resHum = msgHum.getMsgStream();
-    udpBroadcastStream(resHum);
+void reconnect() {
+    while (!mqttClient.connected()) {
+        Serial.print("Reconnecting...");
+        if (!mqttClient.connect("ESP8266Client")) {
+            Serial.print("failed, rc=");
+            Serial.print(mqttClient.state());
+            Serial.println(" retrying in 5 seconds");
+            delay(5000);
+        }
+    }
 }
 
 /**
@@ -225,8 +187,19 @@ void handleWifiConfigPageButtonPressed() {
  * Function to handle sensor updates.
  */
 void handleSensorUpdates() {
-    udpBroadcastTemperature();
-    udpBroadcastHumidity();
+    if (!mqttClient.connected()) {
+        reconnect();
+    }
+    mqttClient.loop();
+    
+    const auto currentTemperature = bme.readTemperature();
+    snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentTemperature);
+    extendetPrint("Temperature: ", currentTemperature, " *C");
+    mqttClient.publish((topic+"/temperature/").c_str(), mqttBuffer);
+    const auto currentHumidity = bme.readHumidity();
+    snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentHumidity);
+    extendetPrint("Humidity: ", currentHumidity, " %");
+    mqttClient.publish((topic+"/humidity/").c_str(), mqttBuffer);
 }
 
 //------------------------------ LOOP ------------------------------
@@ -236,6 +209,6 @@ void loop() {
     if ((currentMillis - lastUpdateMillis) > updateFrequency) {
         lastUpdateMillis = currentMillis;
         handleSensorUpdates();
-        checkForUpdates();
+        checkForSoftwareUpdates();
     }
 }
