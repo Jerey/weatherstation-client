@@ -106,7 +106,7 @@ void connectToWifi() {
 	auto mac = std::string(WiFi.macAddress().c_str());
 	mac.erase (std::remove(mac.begin(), mac.end(), ':'), mac.end());
 	macAdress = mac;
-    topic = "/esp/" + macAdress;
+    topic = "esp/" + macAdress;
 	Serial.println(" -> Success!");
 }
 
@@ -195,11 +195,11 @@ void handleSensorUpdates() {
     const auto currentTemperature = bme.readTemperature();
     snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentTemperature);
     extendetPrint("Temperature: ", currentTemperature, " *C");
-    mqttClient.publish((topic+"/temperature/").c_str(), mqttBuffer);
+    mqttClient.publish((topic+"/temperature").c_str(), mqttBuffer);
     const auto currentHumidity = bme.readHumidity();
     snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentHumidity);
     extendetPrint("Humidity: ", currentHumidity, " %");
-    mqttClient.publish((topic+"/humidity/").c_str(), mqttBuffer);
+    mqttClient.publish((topic+"/humidity").c_str(), mqttBuffer);
 }
 
 //------------------------------ LOOP ------------------------------
