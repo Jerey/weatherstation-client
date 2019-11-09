@@ -10,11 +10,9 @@
 const char* updateServerURL = "http://192.168.178.100:5000/update"; // Enter the correct update URL here.
 
 //------------------------------ Non Blocking Refresh Parameters ------------------------------
-unsigned long lastUpdateMillis;
-unsigned long updateFrequency = 5000;
+unsigned long updateFrequency = 60000; // In ms.
 
 //------------------------------ CONSTANTS ------------------------------
-#define TRIGGER_CONFIG_PORTAL_PIN D8
 #define BME280_I2C_ADDR 0x76 // usually 0x76 or 0x77 --> See https://github.com/adafruit/Adafruit_BME280_Library/issues/15
 
 //------------------------------ BME Sensure Setup ------------------------------
@@ -62,15 +60,6 @@ void checkForSoftwareUpdates()
             Serial.println("INFO status: HTTP_UPDATE_OK");
             break;
     }
-}
-
-/**
- * Helper function, which simply prints "." and sets a delay.
- * @param msec The delay in mseconds.
- */
-void serialPrintDotAndDelay(int msec) {
-	Serial.print(".");
-	delay(msec);
 }
 
 /**
@@ -143,8 +132,6 @@ void setup() {
 	Serial.println(
 			"**************************\n\r******** BEGIN ***********\n\r**************************");
 
-	pinMode(TRIGGER_CONFIG_PORTAL_PIN, INPUT);
-
 	Wire.begin(D3, D4);
 	Wire.setClock(100000);
 	bool status = bme.begin(BME280_I2C_ADDR); 
@@ -155,12 +142,14 @@ void setup() {
     Serial.print("Mqtt broker adress given: ");
     Serial.println(mqttBroker);
     mqttClient.setServer(mqttBroker, 1883);
+
+    pinMode(D0, WAKEUP_PULLUP);
 }
 
 /**
  * Tries to reconnect to the mqtt broker.
  */
-void reconnect() {
+void reconnectToMqttBroker() {
     while (!mqttClient.connected()) {
         Serial.print("Reconnecting...");
         if (!mqttClient.connect("ESP8266Client")) {
@@ -173,22 +162,11 @@ void reconnect() {
 }
 
 /**
- * Handle the "wifi config button"-pressed.
- */
-void handleWifiConfigPageButtonPressed() {
-    if (digitalRead(TRIGGER_CONFIG_PORTAL_PIN) == HIGH) {
-        Serial.println("Received a trigger to go back to a config page!");
-        WiFiManager wifiManager;
-        wifiManager.startConfigPortal(ssidAP, passwordAP);
-    }
-}
-
-/**
  * Function to handle sensor updates.
  */
 void handleSensorUpdates() {
     if (!mqttClient.connected()) {
-        reconnect();
+        reconnectToMqttBroker();
     }
     mqttClient.loop();
     
@@ -196,19 +174,17 @@ void handleSensorUpdates() {
     snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentTemperature);
     extendetPrint("Temperature: ", currentTemperature, " *C");
     mqttClient.publish((topic+"/temperature").c_str(), mqttBuffer);
+    delay(100);
     const auto currentHumidity = bme.readHumidity();
     snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentHumidity);
     extendetPrint("Humidity: ", currentHumidity, " %");
     mqttClient.publish((topic+"/humidity").c_str(), mqttBuffer);
+    delay(100);
 }
 
 //------------------------------ LOOP ------------------------------
 void loop() {
-    handleWifiConfigPageButtonPressed();
-    unsigned long currentMillis = millis();
-    if ((currentMillis - lastUpdateMillis) > updateFrequency) {
-        lastUpdateMillis = currentMillis;
-        handleSensorUpdates();
-        checkForSoftwareUpdates();
-    }
+    checkForSoftwareUpdates();
+    handleSensorUpdates();
+    ESP.deepSleep(updateFrequency * 1000);
 }
