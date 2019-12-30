@@ -27,7 +27,7 @@ std::string macAdress;
 std::string topic;
 
 //------------------------------ MQTT ------------------------------
-const char* mqttBroker = "192.168.178.99";
+const char* mqttBroker = "192.168.178.100";
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 char mqttBuffer[64];
@@ -150,9 +150,9 @@ void setup() {
  * Tries to reconnect to the mqtt broker.
  */
 void reconnectToMqttBroker() {
-    while (!mqttClient.connected()) {
+    while (not mqttClient.connected()) {
         Serial.print("Reconnecting...");
-        if (!mqttClient.connect("ESP8266Client")) {
+        if (not mqttClient.connect("ESP8266Client")) {
             Serial.print("failed, rc=");
             Serial.print(mqttClient.state());
             Serial.println(" retrying in 5 seconds");
@@ -165,26 +165,35 @@ void reconnectToMqttBroker() {
  * Function to handle sensor updates.
  */
 void handleSensorUpdates() {
-    if (!mqttClient.connected()) {
-        reconnectToMqttBroker();
-    }
-    mqttClient.loop();
+    reconnectToMqttBroker();
     
+    auto clientConnectionAlive = mqttClient.loop();
     const auto currentTemperature = bme.readTemperature();
     snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentTemperature);
     extendetPrint("Temperature: ", currentTemperature, " *C");
-    mqttClient.publish((topic+"/temperature").c_str(), mqttBuffer);
-    delay(100);
+    auto resultOfPublish = mqttClient.publish((topic+"/temperature").c_str(), mqttBuffer);
+    if(not resultOfPublish){
+        errorDetected(10, 10, false, "Publishing the temperature failed!");
+        Serial.print("State of client: ");
+        Serial.println(mqttClient.state());
+    }
+    mqttClient.loop();
     const auto currentHumidity = bme.readHumidity();
     snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentHumidity);
     extendetPrint("Humidity: ", currentHumidity, " %");
-    mqttClient.publish((topic+"/humidity").c_str(), mqttBuffer);
-    delay(100);
+    resultOfPublish = mqttClient.publish((topic+"/humidity").c_str(), mqttBuffer);
+    if(not resultOfPublish){
+        errorDetected(10, 10, false, "Publishing the humidity failed!");
+        Serial.print("State of client: ");
+        Serial.println(mqttClient.state());
+    }
+    mqttClient.loop();
 }
 
 //------------------------------ LOOP ------------------------------
 void loop() {
     checkForSoftwareUpdates();
     handleSensorUpdates();
+    mqttClient.disconnect();
     ESP.deepSleep(updateFrequency * 1000);
 }
