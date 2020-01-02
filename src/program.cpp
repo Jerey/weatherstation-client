@@ -7,10 +7,10 @@
 //------------------------------ UpdateServer Constants ------------------------------
 #define VERSION "v1.0.3"
 #define HOST "Weatherstation_Temp_Hum"
-const char* updateServerURL = "http://192.168.178.100:5000/update"; // Enter the correct update URL here.
+constexpr const char* updateServerURL = "http://192.168.178.100:5000/update"; // Enter the correct update URL here.
 
 //------------------------------ Non Blocking Refresh Parameters ------------------------------
-unsigned long updateFrequency = 60000; // In ms.
+constexpr unsigned long updateFrequency = 15 * 60 * 1000; // In ms.
 
 //------------------------------ CONSTANTS ------------------------------
 #define BME280_I2C_ADDR 0x76 // usually 0x76 or 0x77 --> See https://github.com/adafruit/Adafruit_BME280_Library/issues/15
@@ -19,15 +19,15 @@ unsigned long updateFrequency = 60000; // In ms.
 Adafruit_BME280 bme;
 
 //------------------------------ AP ------------------------------
-const char* ssidAP = "AutoConnectAP";
-const char* passwordAP = "password";
+constexpr const char* ssidAP = "AutoConnectAP";
+constexpr const char* passwordAP = "password";
 
 //------------------------------ MAC Adress ------------------------------
 std::string macAdress;
 std::string topic;
 
 //------------------------------ MQTT ------------------------------
-const char* mqttBroker = "192.168.178.100";
+constexpr const char* mqttBroker = "192.168.178.100";
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 char mqttBuffer[64];
@@ -127,6 +127,7 @@ void errorDetected(uint8_t slowblinks, uint8_t fastblinks, bool loop, const char
 
 
 //------------------------------ Setup ------------------------------
+ADC_MODE(ADC_VCC)
 void setup() {
 	Serial.begin(115200);
 	Serial.println(
@@ -167,7 +168,7 @@ void reconnectToMqttBroker() {
 void handleSensorUpdates() {
     reconnectToMqttBroker();
     
-    auto clientConnectionAlive = mqttClient.loop();
+    mqttClient.loop();
     const auto currentTemperature = bme.readTemperature();
     snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentTemperature);
     extendetPrint("Temperature: ", currentTemperature, " *C");
@@ -178,12 +179,24 @@ void handleSensorUpdates() {
         Serial.println(mqttClient.state());
     }
     mqttClient.loop();
+
     const auto currentHumidity = bme.readHumidity();
     snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentHumidity);
     extendetPrint("Humidity: ", currentHumidity, " %");
     resultOfPublish = mqttClient.publish((topic+"/humidity").c_str(), mqttBuffer);
     if(not resultOfPublish){
         errorDetected(10, 10, false, "Publishing the humidity failed!");
+        Serial.print("State of client: ");
+        Serial.println(mqttClient.state());
+    }
+    mqttClient.loop();
+
+    const auto vccValue = ESP.getVcc()/1024.0f;
+    snprintf(mqttBuffer, sizeof mqttBuffer, "%f", vccValue);
+    extendetPrint("Voltage: ", vccValue, " V");
+    resultOfPublish = mqttClient.publish((topic+"/voltage").c_str(), mqttBuffer);
+    if(not resultOfPublish){
+        errorDetected(10, 10, false, "Publishing the voltage failed!");
         Serial.print("State of client: ");
         Serial.println(mqttClient.state());
     }
