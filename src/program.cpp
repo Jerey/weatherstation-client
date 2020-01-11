@@ -119,13 +119,13 @@ void errorDetected(uint8_t slowblinks, uint8_t fastblinks, bool loop,
   pinMode(LED_BUILTIN, OUTPUT);
   do {
     Serial.println(logMessage);
-    for (int i = 0; i < slowblinks; ++i) {
+    for (unsigned int i = 0; i < slowblinks; ++i) {
       digitalWrite(LED_BUILTIN, LOW);
       delay(250);
       digitalWrite(LED_BUILTIN, HIGH);
       delay(250);
     }
-    for (int i = 0; i < fastblinks; ++i) {
+    for (unsigned int i = 0; i < fastblinks; ++i) {
       digitalWrite(LED_BUILTIN, LOW);
       delay(100);
       digitalWrite(LED_BUILTIN, HIGH);
