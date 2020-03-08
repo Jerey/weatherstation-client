@@ -4,6 +4,8 @@
 #include <PubSubClient.h>
 #include <WiFiManager.h>
 
+#include <sstream>
+
 //----------- UpdateServer Constants -----------
 #define VERSION "v1.0.3"
 #define HOST "Weatherstation_Temp_Hum"
@@ -34,6 +36,11 @@ constexpr const char* mqttBroker = "192.168.178.100";
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 char mqttBuffer[64];
+
+//----------- MQTT Topics -----------
+constexpr const char* topicTemperature = "/temperature";
+constexpr const char* topicHumidity = "/humidity";
+constexpr const char* topicVoltage = "/voltage";
 
 /**
  * @brief Function to check the given updateServerURL for new updates.
@@ -146,7 +153,7 @@ void setup() {
   Wire.setClock(100000);
   bool status = bme.begin(BME280_I2C_ADDR);
   if (!status) {
-    errorDetected(16, 16, true,
+    errorDetected(4, 4, false,
                   "Could not find a valid BME280 sensor, check wiring or if "
                   "the defined I2C adress is correct!");
   }
@@ -174,47 +181,35 @@ void reconnectToMqttBroker() {
 }
 
 /**
+ * @brief Tries to publish the given sensorValue to the given targetTopic
+ */
+void publishMqttTopic(float sensorValue, const char* targetTopic) {
+  snprintf(mqttBuffer, sizeof mqttBuffer, "%f", sensorValue);
+  Serial.print(targetTopic);
+  Serial.print(": ");
+  Serial.println(sensorValue);
+  mqttClient.publish((topic + "/temperature").c_str(), mqttBuffer);
+  auto resultOfPublish =
+      mqttClient.publish((topic + targetTopic).c_str(), mqttBuffer);
+  if (not resultOfPublish) {
+    const char* errorLog =
+        (std::string("Failed publishing topic: '") + targetTopic).c_str();
+    errorDetected(3, 3, false, errorLog);
+    Serial.print("State of client: ");
+    Serial.println(mqttClient.state());
+  }
+  mqttClient.loop();
+}
+/**
  * Function to handle sensor updates.
  */
 void handleSensorUpdates() {
   reconnectToMqttBroker();
 
   mqttClient.loop();
-  const auto currentTemperature = bme.readTemperature();
-  snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentTemperature);
-  extendetPrint("Temperature: ", currentTemperature, " *C");
-  auto resultOfPublish =
-      mqttClient.publish((topic + "/temperature").c_str(), mqttBuffer);
-  if (not resultOfPublish) {
-    errorDetected(10, 10, false, "Publishing the temperature failed!");
-    Serial.print("State of client: ");
-    Serial.println(mqttClient.state());
-  }
-  mqttClient.loop();
-
-  const auto currentHumidity = bme.readHumidity();
-  snprintf(mqttBuffer, sizeof mqttBuffer, "%f", currentHumidity);
-  extendetPrint("Humidity: ", currentHumidity, " %");
-  resultOfPublish =
-      mqttClient.publish((topic + "/humidity").c_str(), mqttBuffer);
-  if (not resultOfPublish) {
-    errorDetected(10, 10, false, "Publishing the humidity failed!");
-    Serial.print("State of client: ");
-    Serial.println(mqttClient.state());
-  }
-  mqttClient.loop();
-
-  const auto vccValue = ESP.getVcc() / 1024.0f;
-  snprintf(mqttBuffer, sizeof mqttBuffer, "%f", vccValue);
-  extendetPrint("Voltage: ", vccValue, " V");
-  resultOfPublish =
-      mqttClient.publish((topic + "/voltage").c_str(), mqttBuffer);
-  if (not resultOfPublish) {
-    errorDetected(10, 10, false, "Publishing the voltage failed!");
-    Serial.print("State of client: ");
-    Serial.println(mqttClient.state());
-  }
-  mqttClient.loop();
+  publishMqttTopic(bme.readTemperature(), topicTemperature);
+  publishMqttTopic(bme.readHumidity(), topicHumidity);
+  publishMqttTopic(ESP.getVcc() / 1024.0f, topicVoltage);
 }
 
 //----------- LOOP -----------
