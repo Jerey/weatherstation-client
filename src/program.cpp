@@ -4,8 +4,6 @@
 #include <PubSubClient.h>
 #include <WiFiManager.h>
 
-#include <sstream>
-
 //----------- UpdateServer Constants -----------
 #define VERSION "v1.0.3"
 #define HOST "Weatherstation_Temp_Hum"
@@ -185,10 +183,10 @@ void reconnectToMqttBroker() {
  */
 void publishMqttTopic(float sensorValue, const char* targetTopic) {
   snprintf(mqttBuffer, sizeof mqttBuffer, "%f", sensorValue);
+  Serial.print(topic.c_str());
   Serial.print(targetTopic);
   Serial.print(": ");
   Serial.println(sensorValue);
-  mqttClient.publish((topic + "/temperature").c_str(), mqttBuffer);
   auto resultOfPublish =
       mqttClient.publish((topic + targetTopic).c_str(), mqttBuffer);
   if (not resultOfPublish) {
