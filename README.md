@@ -8,6 +8,8 @@
   - [Visualization of Data](#visualization-of-data)
   - [Setup](#setup)
     - [Hardware](#hardware)
+      - [D1 Mini setup](#d1-mini-setup)
+      - [ESP 01 setup](#esp-01-setup)
     - [Software](#software)
       - [Software settings](#software-settings)
       - [Flashing](#flashing)
@@ -50,16 +52,29 @@ The setup is split up into two areas: hardware setup and software setup.
 
 The list of needed hardware is as follows:
 
-- D1 Mini
+- D1 Mini or an ESP 01
 - BME 280
 - 2 x 4k7 Ohm Resistor
 - Button
 
-Following is the schematic for this setup.
+#### D1 Mini setup
+
+Following is the schematic for this setup with an **D1 Mini**.
 
 <img src="/documentation/Schematic.svg" width="400"> 
 
 Note: The BME280 was added with wires to get a more precise temperature. Initially it was also added to the base shield, but there the temperature was always a bit higher.
+
+#### ESP 01 setup
+
+If you want to reduce power consumption even more, you can use the **ESP01**.
+
+Following pins from the [D1 mini](#d1-mini-setup) have to be changed then:
+
+- `D3` :arrow_right: `Pin 0`
+- `D4` :arrow_right: `Pin 2`
+
+Further, to enable deep sleep, a little soldering has to be done. There are several tutorials in the internet for that, so I will not go into that here.
 
 ### Software
 

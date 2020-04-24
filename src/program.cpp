@@ -146,8 +146,14 @@ void setup() {
   Serial.println(
       "**************************\n\r******** BEGIN "
       "***********\n\r**************************");
-
+#ifdef ESP01
+  Wire.begin(0, 2);
+  pinMode(16, WAKEUP_PULLUP);
+#endif
+#ifdef D1MINI
   Wire.begin(D3, D4);
+  pinMode(D0, WAKEUP_PULLUP);
+#endif
   Wire.setClock(100000);
   bool status = bme.begin(BME280_I2C_ADDR);
   if (!status) {
@@ -159,8 +165,6 @@ void setup() {
   Serial.print("Mqtt broker adress given: ");
   Serial.println(mqttBroker);
   mqttClient.setServer(mqttBroker, 1883);
-
-  pinMode(D0, WAKEUP_PULLUP);
 }
 
 /**
