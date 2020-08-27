@@ -1,7 +1,5 @@
 # Weatherstation - Client
 
-[![Build Status](https://travis-ci.com/aaj07/weatherstation-client.svg?branch=master)](https://travis-ci.com/aaj07/weatherstation-client)
-
 - [Weatherstation - Client](#weatherstation---client)
   - [Idea](#idea)
   - [Current State](#current-state)
@@ -29,7 +27,7 @@ As basis for the project a D1-mini was chosen, as it comes with onboard WiFi. Bu
 
 The idea is to read the sensor data and send it via MQTT. Anyone who wants to use the data, can simply subscribe to the topic ```/esp/#```. To indicate the type of data, the messages are defined by a MAC (to know from which client the message comes from), the type of data and the value. In this case, the topic holds this information in following structure: ```/esp/MAC_ADRESS/TYPE_OF_DATA/```
 
-Have a look at [Weatherstation Server](https://github.com/aaj07/weatherstation-server).
+Have a look at [Weatherstation Server](https://github.com/jerey/weatherstation-server).
 
 ## Current State
 
