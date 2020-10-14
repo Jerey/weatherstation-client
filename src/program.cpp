@@ -7,38 +7,39 @@
 //----------- UpdateServer Constants -----------
 #define VERSION "v1.0.3"
 #define HOST "Weatherstation_Temp_Hum"
-constexpr const char* updateServerURL =
+constexpr const char *updateServerURL =
     "http://192.168.178.100:5000/update";  // Enter the correct update URL here.
 
 //----------- Non Blocking Refresh Parameters -----------
 constexpr unsigned long updateFrequency = 15 * 60 * 1000;  // In ms.
 
 //----------- CONSTANTS -----------
-#define BME280_I2C_ADDR \
-  0x76  // usually 0x76 or 0x77 --> See
-        // https://github.com/adafruit/Adafruit_BME280_Library/issues/15
+// usually 0x76 or 0x77 --> See
+// https://github.com/adafruit/Adafruit_BME280_Library/issues/15
+#define BME280_I2C_ADDR 0x76
 
 //----------- BME Sensure Setup -----------
 Adafruit_BME280 bme;
 
 //----------- AP -----------
-constexpr const char* ssidAP = "AutoConnectAP";
-constexpr const char* passwordAP = "password";
+constexpr const char *ssidAP = "AutoConnectAP";
+constexpr const char *passwordAP = "password";
 
-//----------- MAC Adress -----------
-std::string macAdress;
+//----------- MAC Address -----------
+std::string macAddress;
 std::string topic;
 
 //----------- MQTT -----------
-constexpr const char* mqttBroker = "192.168.178.100";
+constexpr const char *mqttBroker =
+    "192.168.178.100";  // Enter your mqtt broker address here.
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 char mqttBuffer[64];
 
 //----------- MQTT Topics -----------
-constexpr const char* topicTemperature = "/temperature";
-constexpr const char* topicHumidity = "/humidity";
-constexpr const char* topicVoltage = "/voltage";
+constexpr const char *topicTemperature = "/temperature";
+constexpr const char *topicHumidity = "/humidity";
+constexpr const char *topicVoltage = "/voltage";
 
 /**
  * @brief Function to check the given updateServerURL for new updates.
@@ -58,41 +59,15 @@ void checkForSoftwareUpdates() {
   switch (returnStatus) {
     default:
     case HTTP_UPDATE_FAILED:
-      Serial.println("ERROR: HTTP_UPDATE_FAILD Error (" +
+      Serial.println("ERROR: HTTP_UPDATE_FAILED Error (" +
                      String(ESPhttpUpdate.getLastError()) +
                      "): " + ESPhttpUpdate.getLastErrorString().c_str());
       break;
     case HTTP_UPDATE_NO_UPDATES:
       Serial.println("INFO: HTTP_UPDATE_NO_UPDATES");
       break;
-    case HTTP_UPDATE_OK:
-      Serial.println("INFO status: HTTP_UPDATE_OK");
-      break;
+    case HTTP_UPDATE_OK: Serial.println("INFO status: HTTP_UPDATE_OK"); break;
   }
-}
-
-/**
- * Helper function to print a string and a value. It does not add a newline
- * after printing.
- * @param str The string describing what the value does represent.
- * @param val The value.
- */
-void extendetPrint(String str, float val) {
-  Serial.print(str);
-  Serial.print(val);
-}
-
-/**
- * Helper function to print a string, a value and a unit. It does add a newline
- * after printing.
- * @see extendedPrint
- * @param str The string describing what the value does represent.
- * @param val The value.
- * @param unit The unit of the value
- */
-void extendetPrint(String str, float val, String unit) {
-  extendetPrint(str, val);
-  Serial.println(unit);
 }
 
 /**
@@ -105,8 +80,8 @@ void connectToWifi() {
   Serial.println(WiFi.SSID());
   auto mac = std::string(WiFi.macAddress().c_str());
   mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
-  macAdress = mac;
-  topic = "esp/" + macAdress;
+  macAddress = mac;
+  topic = "esp/" + macAddress;
   Serial.println(" -> Success!");
 }
 
@@ -120,7 +95,7 @@ void connectToWifi() {
  * console.
  */
 void errorDetected(uint8_t slowblinks, uint8_t fastblinks, bool loop,
-                   const char* logMessage) {
+                   const char *logMessage) {
   pinMode(LED_BUILTIN, OUTPUT);
   do {
     Serial.println(logMessage);
@@ -159,10 +134,10 @@ void setup() {
   if (!status) {
     errorDetected(4, 4, false,
                   "Could not find a valid BME280 sensor, check wiring or if "
-                  "the defined I2C adress is correct!");
+                  "the defined I2C address is correct!");
   }
   connectToWifi();
-  Serial.print("Mqtt broker adress given: ");
+  Serial.print("Mqtt broker address given: ");
   Serial.println(mqttBroker);
   mqttClient.setServer(mqttBroker, 1883);
 }
@@ -185,7 +160,7 @@ void reconnectToMqttBroker() {
 /**
  * @brief Tries to publish the given sensorValue to the given targetTopic
  */
-void publishMqttTopic(float sensorValue, const char* targetTopic) {
+void publishMqttTopic(float sensorValue, const char *targetTopic) {
   snprintf(mqttBuffer, sizeof mqttBuffer, "%f", sensorValue);
   Serial.print(topic.c_str());
   Serial.print(targetTopic);
@@ -194,7 +169,7 @@ void publishMqttTopic(float sensorValue, const char* targetTopic) {
   auto resultOfPublish =
       mqttClient.publish((topic + targetTopic).c_str(), mqttBuffer);
   if (not resultOfPublish) {
-    const char* errorLog =
+    const char *errorLog =
         (std::string("Failed publishing topic: '") + targetTopic).c_str();
     errorDetected(3, 3, false, errorLog);
     Serial.print("State of client: ");
