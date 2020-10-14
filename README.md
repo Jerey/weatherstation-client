@@ -25,7 +25,7 @@ The idea was to create a platform tracking various climate data, which can be ex
 
 As basis for the project a D1-mini was chosen, as it comes with onboard WiFi. But also other platforms can be used (e.g.: NodeMCU, ...).
 
-The idea is to read the sensor data and send it via MQTT. Anyone who wants to use the data, can simply subscribe to the topic ```/esp/#```. To indicate the type of data, the messages are defined by a MAC (to know from which client the message comes from), the type of data and the value. In this case, the topic holds this information in following structure: ```/esp/MAC_ADRESS/TYPE_OF_DATA/```
+The idea is to read the sensor data and send it via MQTT. Anyone who wants to use the data, can simply subscribe to the topic `/esp/#`. To indicate the type of data, the messages are defined by a MAC (to know from which client the message comes from), the type of data and the value. In this case, the topic holds this information in following structure: `/esp/MAC_ADDRESS/TYPE_OF_DATA/`
 
 Have a look at [Weatherstation Server](https://github.com/jerey/weatherstation-server).
 
@@ -59,7 +59,7 @@ The list of needed hardware is as follows:
 
 Following is the schematic for this setup with an **D1 Mini**.
 
-<img src="/documentation/Schematic.svg" width="400"> 
+<img src="/documentation/Schematic.svg" width="400">
 
 Note: The BME280 was added with wires to get a more precise temperature. Initially it was also added to the base shield, but there the temperature was always a bit higher.
 
@@ -80,16 +80,16 @@ As basis for the software, platform IO was used as it comes with a good library 
 
 #### Software settings
 
-The software allows several settings within the ```program.cpp```. There are more than the mentioned ones, but those are the most important ones:
+The software allows several settings within the `program.cpp`. There are more than the mentioned ones, but those are the most important ones:
 
-1. ```BME280_I2C_ADDR``` - Depending on the used BME280, there are different I^2^C adresses in use. The used library offers a way to set this adress, as described [here](https://github.com/adafruit/Adafruit_BME280_Library/issues/15). Usually the adress is either ```0x76``` or ```0x77```. Please check the datasheet of the used BME280 and set the value.
-2. ```ssidAP``` & ```passwordAP``` - The SSID and password of the accesspoint, which the hardware starts, in case it cannot connect to any wifi. One can then look for the wifi ```ssidAP``` and connect to it with the password ```passwordAP```.
-3. ```updateFrequency``` - The frequency of updates of the parameters/values to be sent to the network. Defined in milliseconds.
+1. `BME280_I2C_ADDR` - Depending on the used BME280, there are different I^2^C addresses in use. The used library offers a way to set this address, as described [here](https://github.com/adafruit/Adafruit_BME280_Library/issues/15). Usually the address is either `0x76` or `0x77`. Please check the datasheet of the used BME280 and set the value.
+2. `ssidAP` & `passwordAP` - The SSID and password of the accesspoint, which the hardware starts, in case it cannot connect to any wifi. One can then look for the wifi `ssidAP` and connect to it with the password `passwordAP`.
+3. `updateFrequency` - The frequency of updates of the parameters/values to be sent to the network. Defined in milliseconds.
 
 #### Flashing
 
 Install platformIO as described on their [webpage](https://docs.platformio.org/en/latest/core.html).
-If you chose platformIO for the CLI, you can execute following command from the terminal: ```platformio run --target upload```
+If you chose platformIO for the CLI, you can execute following command from the terminal: `platformio run --target upload`
 If you use an ide, please refer to the [platformIO documenation](https://docs.platformio.org/en/latest/ide/pioide.html).
 
 ## Documentation
@@ -106,7 +106,7 @@ When the client is started, the [WiFiManager](https://github.com/tzapu/WiFiManag
 
 ### Flashing software to several clients
 
-Work in progress: It currently is possible to flash several clients at once. The [ESP8266httpUpdate](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266httpUpdate) library is used to auto update the firmware, if the defined update server provides any new firmware. This decision is based on a version defined in the ```program.cpp```. For now a python flask server is used as update server. This is currently based on the docker image [esp-update-server](https://hub.docker.com/r/kstobbe/esp-update-server/). For more information on that, checkout the [readme.md](https://github.com/kstobbe/esp-update-server).
+Work in progress: It currently is possible to flash several clients at once. The [ESP8266httpUpdate](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266httpUpdate) library is used to auto update the firmware, if the defined update server provides any new firmware. This decision is based on a version defined in the `program.cpp`. For now a python flask server is used as update server. This is currently based on the docker image [esp-update-server](https://hub.docker.com/r/kstobbe/esp-update-server/). For more information on that, checkout the [readme.md](https://github.com/kstobbe/esp-update-server).
 
 ## Some Images
 
