@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name D1_mini_shield_client)(type KiCad)(uri C:/Users/J/Documents/SDE/weatherstation-client/pcb/D1_mini_shield_client)(options "")(descr "")(disabled))
+  (lib (name d1_mini_kicad-master)(type KiCad)(uri C:/Users/J/Downloads/d1_mini_kicad-master/d1_mini_kicad-master)(options "")(descr ""))
+)

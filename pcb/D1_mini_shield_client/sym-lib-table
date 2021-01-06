@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name wemos_mini)(type Legacy)(uri C:/Users/J/Downloads/d1_mini_kicad-master/d1_mini_kicad-master/library/wemos_mini.lib)(options "")(descr ""))
+  (lib (name d1_mini_shield-rescue)(type Legacy)(uri C:/Users/J/Downloads/d1_mini_kicad-master/d1_mini_kicad-master/template/d1_mini_shield-rescue.lib)(options "")(descr ""))
+  (lib (name d1_mini_shield-cache)(type Legacy)(uri C:/Users/J/Downloads/d1_mini_kicad-master/d1_mini_kicad-master/template/d1_mini_shield-cache.lib)(options "")(descr ""))
+)
