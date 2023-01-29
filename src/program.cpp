@@ -1,14 +1,8 @@
 #include <Adafruit_BME280.h>
 #include <Arduino.h>
-#include <ESP8266httpUpdate.h>
 #include <PubSubClient.h>
 #include <WiFiManager.h>
-
-//----------- UpdateServer Constants -----------
-#define VERSION "v1.0.3"
-#define HOST "Weatherstation_Temp_Hum"
-constexpr const char *updateServerURL =
-    "http://192.168.178.100:5000/update";  // Enter the correct update URL here.
+#include <string>
 
 //----------- Non Blocking Refresh Parameters -----------
 constexpr unsigned long updateFrequency = 15 * 60 * 1000;  // In ms.
@@ -40,35 +34,6 @@ char mqttBuffer[64];
 constexpr const char *topicTemperature = "/temperature";
 constexpr const char *topicHumidity = "/humidity";
 constexpr const char *topicVoltage = "/voltage";
-
-/**
- * @brief Function to check the given updateServerURL for new updates.
- * @see https://github.com/kstobbe/esp-update-server
- */
-void checkForSoftwareUpdates() {
-  String checkUrl = String(updateServerURL);
-  checkUrl.concat("?ver=" + String(VERSION));
-  checkUrl.concat("&dev=" + String(HOST));
-
-  Serial.println("INFO: Checking for updates at URL: " + String(checkUrl));
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  auto returnStatus = ESPhttpUpdate.update(checkUrl);
-#pragma GCC diagnostic pop
-
-  switch (returnStatus) {
-    default:
-    case HTTP_UPDATE_FAILED:
-      Serial.println("ERROR: HTTP_UPDATE_FAILED Error (" +
-                     String(ESPhttpUpdate.getLastError()) +
-                     "): " + ESPhttpUpdate.getLastErrorString().c_str());
-      break;
-    case HTTP_UPDATE_NO_UPDATES:
-      Serial.println("INFO: HTTP_UPDATE_NO_UPDATES");
-      break;
-    case HTTP_UPDATE_OK: Serial.println("INFO status: HTTP_UPDATE_OK"); break;
-  }
-}
 
 /**
  * Function to connect to a wifi. It waits until a connection is established.
@@ -191,7 +156,6 @@ void handleSensorUpdates() {
 
 //----------- LOOP -----------
 void loop() {
-  checkForSoftwareUpdates();
   handleSensorUpdates();
   mqttClient.disconnect();
   ESP.deepSleep(updateFrequency * 1000);
