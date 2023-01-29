@@ -10,7 +10,7 @@ constexpr unsigned long updateFrequency = 15 * 60 * 1000;  // In ms.
 //----------- CONSTANTS -----------
 // usually 0x76 or 0x77 --> See
 // https://github.com/adafruit/Adafruit_BME280_Library/issues/15
-#define BME280_I2C_ADDR 0x76
+constexpr uint8_t BME280_I2C_ADDR = 0x76;
 
 //----------- BME Sensure Setup -----------
 Adafruit_BME280 bme;
