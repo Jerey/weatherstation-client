@@ -1,23 +1,5 @@
 # Weatherstation - Client
 
-- [Weatherstation - Client](#weatherstation---client)
-  - [Idea](#idea)
-  - [Current State](#current-state)
-  - [Visualization of Data](#visualization-of-data)
-  - [Setup](#setup)
-    - [Hardware](#hardware)
-      - [D1 Mini setup](#d1-mini-setup)
-      - [ESP 01 setup](#esp-01-setup)
-    - [Software](#software)
-      - [Software settings](#software-settings)
-      - [Flashing](#flashing)
-  - [Documentation](#documentation)
-  - [Usage of the client](#usage-of-the-client)
-    - [Accesspoint at the beginning](#accesspoint-at-the-beginning)
-    - [Flashing software to several clients](#flashing-software-to-several-clients)
-  - [Some Images](#some-images)
-  - [Footnotes](#footnotes)
-
 ## Idea
 
 The idea was to create a platform tracking various climate data, which can be extended and has no dependencies to the visualization. Therefore a network based solution was chosen.
