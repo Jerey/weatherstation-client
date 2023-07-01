@@ -18,6 +18,7 @@ Adafruit_BME280 bme;
 //----------- AP -----------
 constexpr const char *ssidAP = "AutoConnectAP";
 constexpr const char *passwordAP = "password";
+constexpr unsigned long configPortalTimeout = 600;
 
 //----------- MAC Address -----------
 std::string macAddress;
@@ -41,7 +42,14 @@ constexpr const char *topicVoltage = "/voltage";
 void connectToWifi() {
   WiFiManager wifiManager;
   wifiManager.setBreakAfterConfig(true);
+
+  // If nobody has configured the wifi in the given timeout ..
+  // .. restart the ESP and try to reconnect to the previous WiFi.
+  wifiManager.setConfigPortalTimeout(configPortalTimeout);
+  wifiManager.setConfigPortalTimeoutCallback([] { ESP.restart(); });
+
   wifiManager.autoConnect(ssidAP, passwordAP);
+
   Serial.println(WiFi.SSID());
   auto mac = std::string(WiFi.macAddress().c_str());
   mac.erase(std::remove(mac.begin(), mac.end(), ':'), mac.end());
